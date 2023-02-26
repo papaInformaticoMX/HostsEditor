@@ -1,55 +1,56 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QTextEdit, QPushButton, QHBoxLayout, QVBoxLayout
+from HostsEditorLogic import HostsEditorLogic
 
 class HostsEditor(QWidget):
-    def __init__(self):
+    def __init__(self, logic):
         super().__init__()
+        self.logic = logic
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Editor de archivo Hosts')
 
         self.textEdit = QTextEdit(self)
-        self.textEdit.setVerticalScrollBarPolicy(1) # agregar barra de desplazamiento vertical siempre
-        self.textEdit.setSizePolicy(1, 1) # establecer la política de expansión para ocupar todo el espacio vertical disponible
+        self.textEdit.setText(self.logic.load_file())
 
         self.saveBtn = QPushButton('Guardar cambios', self)
-        self.saveBtn.clicked.connect(self.saveChanges)
+        self.saveBtn.clicked.connect(self.save_changes)
 
         self.cancelBtn = QPushButton('Cancelar', self)
-        self.cancelBtn.clicked.connect(self.cancelChanges)
+        self.cancelBtn.clicked.connect(self.cancel_changes)
 
         self.restoreBtn = QPushButton('Restaurar original', self)
-        self.restoreBtn.clicked.connect(self.restoreOriginal)
+        self.restoreBtn.clicked.connect(self.restore_original)
 
         buttonLayout = QHBoxLayout()
         buttonLayout.addWidget(self.saveBtn)
         buttonLayout.addWidget(self.cancelBtn)
         buttonLayout.addWidget(self.restoreBtn)
 
+        topLayout = QVBoxLayout()
+        topLayout.addLayout(buttonLayout)
+        topLayout.addWidget(self.textEdit)
+
         layout = QVBoxLayout()
-        layout.addWidget(self.textEdit)
-        layout.addLayout(buttonLayout)
+        layout.addLayout(topLayout)
 
         self.setLayout(layout)
-        self.loadFile()
 
-    def loadFile(self):
-        with open('C:\\Windows\\System32\\drivers\\etc\\hosts', 'r') as file:
-            self.textEdit.setText(file.read())
-
-    def saveChanges(self):
-        with open('C:\\Windows\\System32\\drivers\\etc\\hosts', 'w') as file:
-            file.write(self.textEdit.toPlainText())
-
-    def cancelChanges(self):
+    def save_changes(self):
+        self.logic.write_file(self.textEdit.toPlainText())
         self.close()
 
-    def restoreOriginal(self):
-        self.loadFile()
+    def cancel_changes(self):
+        self.close()
+
+    def restore_original(self):
+        self.textEdit.setText(self.logic.restore_original())
 
 if __name__ == '__main__':
+    config_path = 'config.txt'
+    logic = HostsEditorLogic(config_path)
     app = QApplication(sys.argv)
-    ex = HostsEditor()
+    ex = HostsEditor(logic)
     ex.showMaximized()
     sys.exit(app.exec_())
