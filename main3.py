@@ -34,12 +34,18 @@ def is_valid_hosts_content(content):
     regex = r"(?P<ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+(?P<host_name>\S+)"
     return all(re.match(regex, line) for line in content.splitlines() if line.strip() and not line.startswith("#"))
 
+# Función para agregar la línea de Netflix
+def add_netflix_line():
+    text_box.insert(tk.END, "127.0.0.1   netflix.com\n")
+    text_box.insert(tk.END, "127.0.0.1   youtube.com\n")
+    text_box.insert(tk.END, "127.0.0.1   disneyplus.com\n")
+
 # Crear la ventana
 window = tk.Tk()
 window.title("Modificar archivo hosts")
 
 # Crear la etiqueta
-label = tk.Label(window, text="""Agrega esta linea para bloquear sitio: 127.0.0.1  sitio_a_bloquear, ejemplo: 127.0.0.1  netflix.com""")
+label = tk.Label(window, text="Edita el contenido del archivo hosts:")
 label.pack()
 
 # Crear la caja de texto
@@ -51,9 +57,13 @@ with open(r"C:\Windows\System32\drivers\etc\hosts", "r") as f:
     content = f.read()
     text_box.insert(tk.END, content)
 
-# Crear el botón
+# Crear el botón para guardar cambios
 button = tk.Button(window, text="Guardar cambios", command=modify_hosts)
 button.pack()
+
+# Crear el botón para agregar la línea de Netflix
+netflix_button = tk.Button(window, text="Bloquear Netflix, disney y youtube", command=add_netflix_line)
+netflix_button.pack()
 
 # Controlador de eventos para maximizar la caja de texto cuando la ventana se maximiza
 def on_window_resize(event):
